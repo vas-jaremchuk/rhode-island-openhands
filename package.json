@@ -11,7 +11,7 @@
     "serve": "cross-env NODE_ENV=production node app",
     "setup": "node app @apostrophecms/migration:migrate && (echo admin | node app @apostrophecms/user:add admin admin > /dev/null 2>&1 || true)",
     "lint": "eslint .",
-    "test": "node scripts/smoke.mjs",
+    "test": "mocha 'test/server/**/*.test.mjs' --timeout 60000",
     "test:e2e": "node -e \"console.log('No browser tests yet (added by Task T1.6).')\"",
     "ci": "npm run lint && npm test && npm run build && npm run test:e2e"
   },
@@ -48,6 +48,7 @@
   "devDependencies": {
     "autoprefixer": "^10.4.20",
     "eslint-config-apostrophe": "^6.0.1",
+    "mocha": "^12.0.3",
     "nodemon": "^3.0.1"
   },
   "allowScripts": {

@@ -1,11 +1,15 @@
 import 'dotenv/config';
+import { pathToFileURL } from 'node:url';
 import apostrophe from 'apostrophe';
 
 // The site runs on SQLite (no database server). `.env` is not committed, so fall
 // back to the project's database file; staging and production set APOS_DB_URI.
 process.env.APOS_DB_URI ??= 'sqlite://data/site.db';
 
-apostrophe({
+// The module registry lives here so `node app` and the server test harness
+// (`test/server/helpers.mjs`, which boots these modules programmatically) share
+// one list. New modules are still registered in this file.
+export const aposOptions = {
   root: import.meta,
   shortName: 'organo-ri',
   modules: {
@@ -38,4 +42,11 @@ apostrophe({
     'nested-layout-widget': {},
     'nested-column-widget': {}
   }
-});
+};
+
+// Only start the site when this file is the entry point (`node app`, `npm run dev`,
+// `node app <task>`). Importing it for the options must not boot a second instance.
+const entryUrl = process.argv[1] && pathToFileURL(process.argv[1]).href;
+if (entryUrl === import.meta.url || entryUrl + '.js' === import.meta.url) {
+  apostrophe(aposOptions);
+}
