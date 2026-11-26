@@ -1,0 +1,29 @@
+name: openhands-release
+on:
+  issues:
+    types: [closed]
+  workflow_dispatch:
+permissions:
+  issues: write
+jobs:
+  release-next:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const order = (title) => Number((title.match(/^\[(\d+)\/\d+\]/) || [])[1]);
+            const issues = await github.paginate(github.rest.issues.listForRepo, {
+              owner: context.repo.owner, repo: context.repo.repo, state: 'open', per_page: 100,
+            });
+            const tasks = issues
+              .filter((i) => !i.pull_request && order(i.title))
+              .map((i) => ({ ...i, n: order(i.title), labels: i.labels.map((l) => l.name) }))
+              .sort((a, b) => a.n - b.n);
+            const running = tasks.find((t) => t.labels.includes('openhands'));
+            if (running) return core.info(`#${running.number} [${running.n}] is still open; nothing to release.`);
+            const next = tasks[0];
+            if (!next || !next.labels.includes('openhands:waiting')) return core.info('No waiting task to release.');
+            await github.rest.issues.removeLabel({ ...context.repo, issue_number: next.number, name: 'openhands:waiting' });
+            await github.rest.issues.addLabels({ ...context.repo, issue_number: next.number, labels: ['openhands'] });
+            core.info(`Released #${next.number} [${next.n}] ${next.title}`);
