@@ -1,0 +1,118 @@
+// Shared components — reference/spec/02-design-system.md §Components and
+// reference/spec/04-frontend.md §Styles.
+//
+// Type comes from the `t-*` utilities in `_type.scss`; the declarations here
+// only add layout, colour and state. Tokens only: no raw colour and no px font
+// size (`scripts/check-tokens.mjs`).
+
+.c-section-heading {
+  display: flex;
+  flex-direction: column;
+  color: var(--c-blue);
+}
+
+.c-section-heading--center {
+  align-items: center;
+  text-align: center;
+}
+
+.c-section-heading--left {
+  align-items: flex-start;
+  text-align: left;
+}
+
+.c-section-heading--white {
+  color: var(--c-white);
+}
+
+// §Components `button` (solid): bg --c-blue, white `button` text, h 54 mobile /
+// 60 desktop, padding 0 36 without an arrow and 0 16 0 24 with it, gap 8.
+.c-btn {
+  @extend .t-button;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-block-size: 54px;
+  padding: 0 36px;
+  border: 0;
+  border-radius: 0;
+  background: var(--c-blue);
+  color: var(--c-white);
+  text-decoration: none;
+  cursor: pointer;
+
+  &:has(.c-icon) {
+    padding: 0 16px 0 24px;
+  }
+
+  // §Components: hover bg #22528E, the --c-blue-mid token.
+  &:hover {
+    background: var(--c-blue-mid);
+  }
+
+  // §Components: 3 px --c-yellow outline, offset 2.
+  &:focus-visible {
+    outline: 3px solid var(--c-yellow);
+    outline-offset: 2px;
+  }
+
+  @include mq(lg) {
+    min-block-size: 60px;
+  }
+}
+
+// §Components `button--outline-yellow` (About "LEARN MORE"): transparent,
+// 2 px --c-yellow border, white text, h 54 / 60, padding 0 36.
+.c-btn--outline-yellow {
+  background: transparent;
+  border: 2px solid var(--c-yellow);
+  padding: 0 36px;
+}
+
+// §Components `button--outline-white` (header CONTACT US): 1 px white border,
+// radius 1, 116 × 32, `nav` style. Hidden below `lg` by the header (Q-5).
+.c-btn--outline-white {
+  min-block-size: 32px;
+  inline-size: 116px;
+  padding: 0;
+  border: 1px solid var(--c-white);
+  border-radius: 1px;
+  background: transparent;
+  font-family: var(--f-alt);
+  font-size: 0.75rem;
+  line-height: 2.625rem;
+  letter-spacing: 0.05em;
+
+  &:hover {
+    background: transparent;
+  }
+}
+
+// §Components: the 24 px Feather arrow inside a button.
+.c-btn .c-icon {
+  inline-size: 24px;
+  block-size: 24px;
+}
+
+// §Components `link-more`: the `link` type style, blue.
+.c-link-more {
+  @extend .t-link;
+  color: var(--c-blue);
+}
+
+// Icons are decorative unless the caller passes a label; the size comes from
+// the context (the button sets 24 px, the news card 28 px).
+.c-icon {
+  display: inline-block;
+  flex: none;
+  inline-size: 1em;
+  block-size: 1em;
+  fill: currentColor;
+  vertical-align: middle;
+}
+
+.c-picture {
+  display: block;
+}
