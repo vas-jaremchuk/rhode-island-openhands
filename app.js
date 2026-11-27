@@ -34,6 +34,9 @@ export const aposOptions = {
         className: 'bp-video-widget'
       }
     },
+    // The media library accepts SVG (logos, the 100-year lock-up) and
+    // sanitizes every SVG on upload.
+    '@apostrophecms/attachment': {},
     // `asset` supports the project's build for client-side assets.
     asset: {},
     // Vite bundles client-side assets and provides hot module reloading.
