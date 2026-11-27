@@ -37,6 +37,8 @@ export const aposOptions = {
     // The media library accepts SVG (logos, the 100-year lock-up) and
     // sanitizes every SVG on upload.
     '@apostrophecms/attachment': {},
+    // Header and SEO settings for the site chrome (reference/spec/03-backend.md §4).
+    '@apostrophecms/global': {},
     // `asset` supports the project's build for client-side assets.
     asset: {},
     // Vite bundles client-side assets and provides hot module reloading.

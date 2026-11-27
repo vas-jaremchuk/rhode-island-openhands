@@ -153,6 +153,15 @@ $_scale: (
     size: (18, 18),
     line: (31, 31)
   ),
+  // §Typography `nav` (header links): Libre Franklin 700 12/42, tracking 0.05em.
+  nav: (
+    family: alt,
+    weight: 700,
+    size: (12, 12),
+    line: (42, 42),
+    case: uppercase,
+    tracking: 0.05em
+  ),
   button: (
     family: body,
     weight: 700,
