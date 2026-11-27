@@ -10,58 +10,52 @@
 // `data` is deliberately not destructured here. Props passed by a page
 // template arrive as this template's data, so `data.main` is the `main` prop
 // rather than anything belonging to the page document.
+//
+// The chrome comes from Global settings (reference/spec/03-backend.md §4):
+// Header.jsx and Footer.jsx render it, and `beforeMain`/`afterMain` keep it
+// inside Apostrophe's refreshable region so edits update it.
+import Header from './components/Header.jsx';
+import Footer from './components/Footer.jsx';
 
-function Header({ user }) {
+// <head> metadata from the Global SEO group. The canonical URL is the page's
+// own path under the site's base URL, so a preview or edit query string never
+// becomes canonical.
+function Meta({
+  global, data, apos
+}) {
+  const description = global.metaDescription?.trim();
+  const ogImage = global._ogImage?.[0];
+  const pagePath = data.page?._url;
+  // `baseUrlWithPrefix` is empty when the request has no configured host, so
+  // fall back to `baseUrl` (which Apostrophe always fills in).
+  const baseUrl = data.baseUrlWithPrefix || data.baseUrl;
+  const canonical = pagePath && baseUrl
+    ? `${baseUrl}${pagePath}`
+    : null;
+  const ogImagePath = ogImage?.attachment
+    ? apos.attachment.url(ogImage.attachment, { size: 'full' })
+    : null;
+  const ogImageUrl = ogImagePath && data.baseUrl
+    ? `${data.baseUrl}${ogImagePath}`
+    : ogImagePath;
   return (
-    <header className='bp-header'>
-      <img className='bp-header__logo' src='/images/logo.png' alt='ApostropheCMS logo' />
-      <nav className='bp-nav' />
-      {!user && (
-        <a className='bp-button bp-header__login' href='/login'>Login</a>
-      )}
-    </header>
-  );
-}
-
-const footerLinks = [
-  {
-    url: 'https://apostrophecms.com/',
-    label: 'About ApostropheCMS'
-  },
-  {
-    url: 'https://chat.apostrophecms.com/',
-    label: 'Discord'
-  },
-  {
-    url: 'https://x.com/apostrophecms',
-    label: 'X / Twitter'
-  },
-  {
-    url: 'https://github.com/apostrophecms/apostrophe/discussions',
-    label: 'GitHub Discussions'
-  }
-];
-
-function Footer() {
-  return (
-    <footer className='bp-footer'>
-      <h3>Essential Links</h3>
-      <ul className='bp-footer__links'>
-        {footerLinks.map(({ url, label }) => (
-          <li>
-            <a href={url} target='_blank' rel='noopener noreferrer'>{label}</a>
-          </li>
-        ))}
-      </ul>
-    </footer>
+    <>
+      {description ? <meta name='description' content={description} /> : null}
+      {ogImageUrl ? <meta property='og:image' content={ogImageUrl} /> : null}
+      {canonical ? <link rel='canonical' href={canonical} /> : null}
+    </>
   );
 }
 
 export default function (data, { Extend, apos }) {
+  const global = data.global || {};
+
   // `data.title` is how a page template overrides the title — the JSX
   // equivalent of Nunjucks `{% block title %}`. Templates without a page or
-  // piece in context (notFound.jsx) rely on it.
+  // piece in context (notFound.jsx) rely on it. The site title from Global is
+  // the default for every page (reference/spec/03-backend.md §4 SEO group).
   const title = data.title ||
+    global.siteTitle ||
     (data.piece && data.piece.title) ||
     (data.page && data.page.title);
 
@@ -73,15 +67,10 @@ export default function (data, { Extend, apos }) {
     <Extend
       templateName={data.outerLayout}
       title={title}
-      main={
-        <div className='bp-wrapper'>
-          <Header user={data.user} />
-          <main className='bp-main'>
-            {data.main}
-          </main>
-          <Footer />
-        </div>
-      }
+      extraHead={<Meta global={global} data={data} apos={apos} />}
+      beforeMain={<Header global={global} apos={apos} />}
+      main={<main className='c-main'>{data.main}</main>}
+      afterMain={<Footer />}
     />
   );
 }

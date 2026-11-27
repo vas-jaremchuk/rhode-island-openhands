@@ -10,6 +10,7 @@ import {
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import images from './seed/images.js';
+import globalSettings from './seed/global.js';
 
 const IMAGE_DIR = 'fixtures/images';
 const DB_FILE_SUFFIXES = [ '', '-wal', '-shm' ];
@@ -39,8 +40,9 @@ export default {
         const req = self.apos.task.getReq({ mode: 'published' });
         await self.ensureAdmin(req);
         await self.seedImages(req);
+        await self.seedGlobal(req);
         await self.ensureHomePage(req);
-        self.apos.util.log('site:seed: admin, images and home page are in place');
+        self.apos.util.log('site:seed: admin, images, Global settings and home page are in place');
       },
 
       async ensureAdmin(req) {
@@ -103,6 +105,57 @@ export default {
             await rm(uploadPath, { force: true });
           }
         }
+      },
+
+      // Fills the Global settings the layout reads (header wordmarks, utility
+      // links, SEO). Only empty fields are written, so an editor's changes
+      // survive a re-run and a second seed creates nothing.
+      async seedGlobal(req) {
+        const globalModule = self.apos.modules['@apostrophecms/global'];
+        const current = await globalModule.findGlobal(req);
+        if (!current) {
+          throw new Error('site:seed: the global settings document is missing');
+        }
+        const patch = {};
+        const relation = async (title) => {
+          const image = await self.findImageByTitle(req, title);
+          return image ? [ image ] : null;
+        };
+        if (!current.siteTitle) {
+          patch.siteTitle = globalSettings.siteTitle;
+        }
+        if (!current.metaDescription) {
+          patch.metaDescription = globalSettings.metaDescription;
+        }
+        if (!current.utilityLinks?.length) {
+          patch.utilityLinks = globalSettings.utilityLinks;
+        }
+        for (const [ field, title ] of [
+          [ '_headerLogo', globalSettings.headerLogo ],
+          [ '_headerLogoMobile', globalSettings.headerLogoMobile ],
+          [ '_ogImage', globalSettings.ogImage ]
+        ]) {
+          if (!current[field]?.length) {
+            const value = await relation(title);
+            if (value) {
+              patch[field] = value;
+            }
+          }
+        }
+        if (Object.keys(patch).length === 0) {
+          return current;
+        }
+        return globalModule.update(req, {
+          ...current,
+          ...patch
+        });
+      },
+
+      // The media-library piece whose title the seed used to import it.
+      async findImageByTitle(req, title) {
+        const imageModule = self.apos.modules['@apostrophecms/image'];
+        const slug = `${imageModule.options.slugPrefix}${self.apos.util.slugify(title)}`;
+        return imageModule.find(req, { slug }).toObject();
       },
 
       // Parked pages are created at startup by `@apostrophecms/migration`, so

@@ -75,6 +75,9 @@
 // radius 1, 116 × 32, `nav` style. Hidden below `lg` by the header (Q-5).
 .c-btn--outline-white {
   min-block-size: 32px;
+  // §Components: the 116 × 32 frame, so the 42 px nav line box overflows the
+  // box instead of stretching it.
+  block-size: 32px;
   inline-size: 116px;
   padding: 0;
   border: 1px solid var(--c-white);
@@ -115,4 +118,139 @@
 
 .c-picture {
   display: block;
+}
+
+// Site chrome — reference/spec/02-design-system.md node map rows 1 (header) and
+// 10 (footer), reference/spec/04-frontend.md §Section layouts, Q-5 (mobile
+// header is the logo only) and Q-6 (the footer is an empty block).
+
+// Header below `lg`: the 50 px logo-only bar (Q-5, node 2161:236), a solid
+// --c-blue bar with the 126 px wordmark at the mobile gutter.
+.c-header {
+  position: relative;
+  z-index: 1;
+}
+
+.c-header__utility {
+  display: none;
+}
+
+.c-header__bar {
+  display: flex;
+  align-items: center;
+  min-block-size: 50px;
+  background: var(--c-blue);
+}
+
+.c-header__bar-inner {
+  display: flex;
+  align-items: center;
+  inline-size: 100%;
+}
+
+.c-header__logo {
+  display: block;
+  line-height: 0;
+}
+
+.c-header__logo-img {
+  inline-size: 126px;
+  block-size: auto;
+}
+
+// Node map row 1: from `lg` the header overlays the hero — a 65 px utility row
+// and the 92 px --c-header logo bar, with the 252 × 22 wordmark at the wide
+// container's left (x = 57 at 1440).
+@include mq(lg) {
+  .c-header {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline: 0;
+  }
+
+  .c-header__utility {
+    display: block;
+    // White links need a dark backdrop. Over the hero the row is transparent;
+    // see the rule after this block.
+    background: var(--c-blue);
+  }
+
+  .c-header__utility-inner {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    block-size: 65px;
+  }
+
+  .c-header__links {
+    display: flex;
+    align-items: center;
+    gap: 50px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .c-header__item {
+    display: flex;
+    align-items: center;
+  }
+
+  .c-header__bar {
+    min-block-size: 92px;
+    background: var(--c-header);
+  }
+
+  .c-header__logo-img {
+    inline-size: 252px;
+  }
+}
+
+// §Typography `nav`: Libre Franklin 700 12/42, tracking 0.05em, upper.
+.c-header__link {
+  @extend .t-nav;
+
+  color: var(--c-white);
+  text-decoration: none;
+  white-space: nowrap;
+
+  // §Accessibility: the focus ring is yellow on dark backgrounds.
+  &:focus-visible {
+    outline-color: var(--c-yellow);
+  }
+}
+
+// Node map row 1: the utility row is transparent over the hero. Until a hero
+// renders (Task 15) the page behind it is white, so the row keeps --c-blue and
+// the white links stay at 14.6:1; with a hero in the page it goes transparent.
+body:has(.s-hero) .c-header__utility {
+  @include mq(lg) {
+    background: transparent;
+  }
+}
+
+// The header overlays the first section, so content that is not a hero starts
+// below it (65 + 92 px, node map row 1). The hero starts at the top and runs
+// under the header.
+@include mq(lg) {
+  .c-main {
+    padding-block-start: 157px;
+  }
+}
+
+body:has(.s-hero) .c-main {
+  @include mq(lg) {
+    padding-block-start: 0;
+  }
+}
+
+// Footer (node map row 10, Q-6): a plain --c-footer block with no content,
+// 270 px tall below 768 and 354 px from 768.
+.c-footer {
+  background: var(--c-footer);
+  block-size: 270px;
+
+  @include mq(md) {
+    block-size: 354px;
+  }
 }

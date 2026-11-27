@@ -13,6 +13,11 @@ export default [
     alt: ''
   },
   {
+    file: 'header-wordmark-375.svg',
+    title: 'Organogenesis wordmark mobile',
+    alt: ''
+  },
+  {
     file: 'hero-background.jpg',
     title: 'Hero background',
     alt: ''
