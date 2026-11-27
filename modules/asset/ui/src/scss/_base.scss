@@ -1,0 +1,70 @@
+// Base styles — reference/spec/04-frontend.md §Styles (reset, body,
+// focus-visible). Tokens only: no hex colour and no px font size here.
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  // Keep the browser's own size so the rem values in `_type.scss` scale with
+  // the reader's settings.
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--c-white);
+  color: var(--c-text);
+  font-family: var(--f-body);
+  font-size: 1.125rem; // `body` style: 18 px
+  font-weight: 400;
+  line-height: 1.75rem; // `body` style: 28 px
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+figure,
+blockquote {
+  margin: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: inherit;
+}
+
+a {
+  color: var(--c-blue);
+}
+
+img,
+video {
+  max-width: 100%;
+  height: auto;
+}
+
+// A long code line wraps instead of widening the page (a scrollable region
+// would also have to be keyboard focusable).
+pre {
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
+// The focus ring is blue on the light backgrounds that make up most of the
+// page; dark sections switch it to `--c-yellow` (reference/spec/04-frontend.md
+// §Accessibility).
+:focus-visible {
+  outline: 3px solid var(--c-blue);
+  outline-offset: 2px;
+}

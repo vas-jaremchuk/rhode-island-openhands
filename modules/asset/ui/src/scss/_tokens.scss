@@ -1,0 +1,50 @@
+// Design tokens — reference/spec/02-design-system.md §Colour tokens,
+// §Typography and §Layout.
+//
+// This is the only stylesheet allowed to contain a hex colour, rgb()/rgba() or
+// a px font size; `scripts/check-tokens.mjs` fails `npm run lint` when one
+// appears anywhere else under `modules/**/ui/src/`.
+
+@import './mixins';
+
+:root {
+  // §Colour tokens
+  --c-blue: #002855; // Organo Blue: headings, buttons, links, card titles
+  --c-yellow: #FFCD03; // Organo Bright Yellow: decorative rules and borders only
+  --c-blue-mid: #22528E; // News date and icon
+  --c-text: #63666B; // Body and lead text on light backgrounds, form borders
+  --c-surface: #F8F8F8; // Cards, carousel buttons, Education background
+  --c-header: #47566E; // Header logo bar
+  --c-track: #E2E2E2; // Carousel progress track
+  --c-white: #FFFFFF; // Text on dark backgrounds, page background, form fields
+  --c-overlay: rgba(0, 0, 0, .4); // Video poster overlay
+  --c-footer: #041C2C; // Footer block
+
+  // §Colour tokens — gradients. The brand gradient runs at −87.9deg on the
+  // mobile design and −80.6deg on the desktop one.
+  --g-brand: linear-gradient(-87.9deg, rgba(21, 40, 107, .9) 16.44%, rgba(0, 160, 158, .8) 104.87%, rgba(21, 40, 107, .9) 111.55%);
+  --g-navy: linear-gradient(1.38deg, #041C2C 2.37%, #002855 72.77%);
+  --g-contact: linear-gradient(to bottom, #EFF2F4, #FFFFFF);
+
+  // §Typography — families. Libre Franklin replaces BentonSans (Q-1).
+  --f-display: 'Roboto Condensed', 'Arial Narrow', sans-serif;
+  --f-body: Roboto, system-ui, sans-serif;
+  --f-alt: 'Libre Franklin', Roboto, sans-serif;
+
+  // §Layout — container widths, gutters and section padding.
+  --container: 1100px;
+  --container-wide: 1326px;
+  --gutter: 14px;
+  --section-padding: 60px;
+
+  @include mq(lg) {
+    --g-brand: linear-gradient(-80.6deg, rgba(21, 40, 107, .9) 16.44%, rgba(0, 160, 158, .8) 104.87%, rgba(21, 40, 107, .9) 111.55%);
+    --section-padding: 90px;
+  }
+
+  // §Layout — breakpoints, exposed for reference. Media queries use the Sass
+  // variables in `_mixins.scss`; these cannot be read from `mq()`.
+  --bp-md: #{$bp-md};
+  --bp-lg: #{$bp-lg};
+  --bp-xl: #{$bp-xl};
+}

@@ -11,7 +11,7 @@
     "serve": "cross-env NODE_ENV=production node app",
     "setup": "node app @apostrophecms/migration:migrate && node app site:seed",
     "reset": "node app site:reset",
-    "lint": "eslint .",
+    "lint": "eslint . && node scripts/check-tokens.mjs",
     "test": "mocha 'test/server/**/*.test.mjs' --timeout 60000",
     "test:e2e": "playwright test",
     "ci": "npm run lint && npm test && npm run build && npm run test:e2e"
@@ -41,6 +41,9 @@
   "license": "UNLICENSED",
   "dependencies": {
     "@apostrophecms/vite": "^1.1.2",
+    "@fontsource-variable/libre-franklin": "^5.3.0",
+    "@fontsource-variable/roboto": "^5.3.0",
+    "@fontsource-variable/roboto-condensed": "^5.3.0",
     "apostrophe": "~4.34.1",
     "cross-env": "^10.1.0",
     "dotenv": "^17.4.2",
