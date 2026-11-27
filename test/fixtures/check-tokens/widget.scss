@@ -1,0 +1,8 @@
+// Fixture for `test/server/check-tokens.test.mjs`. It stands in for a widget
+// stylesheet that reaches for raw values instead of the design tokens, and it
+// is never imported by the site.
+.s-example {
+  color: #fff;
+  background: rgb(0 40 85 / 50%);
+  font-size: 14px;
+}

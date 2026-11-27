@@ -1,76 +1,202 @@
-h1,
-h2,
-h3 {
-  text-align: center;
-}
+// Type utilities — reference/spec/02-design-system.md §Typography.
+//
+// Every style in the §Typography table becomes a `.t-*` class. Sizes are the
+// mobile (375 px) and desktop (1440 px) pairs from that table; the loop turns
+// each pair into a `clamp()` so the two design widths render at their exact
+// size and the widths between them scale fluidly.
+//
+// Title tracking differs per section in Figma (Q-4 keeps it as designed), so
+// the three title styles read `--title-tracking` and fall back to their own
+// section default.
 
-h1 {
-  font-size: 4em;
-  font-weight: 200;
-}
+@use 'sass:list';
+@use 'sass:map';
+@use 'sass:math';
+@use 'sass:string';
 
-a {
-  color: $color-purple;
-  text-decoration: none;
-
-  &:hover,
-  &:focus {
-    text-decoration: underline;
+// Fluid value between the 375 px and 1440 px designs.
+//
+// The slope is rounded just past the exact interpolation and the intercept is
+// rounded away from the design size, so the preferred value falls outside the
+// `clamp()` bounds at both design widths: 375 px renders the mobile size and
+// 1440 px the desktop size exactly, while the widths between them interpolate.
+@function _fluid($mobile, $desktop) {
+  @if $mobile == $desktop {
+    @return string.unquote('#{math.div($mobile, 16)}rem');
   }
 
-  &:visited {
-    color: $color-purple-light;
+  $exact-slope: math.div($desktop - $mobile, 1440 - 375);
+  $slope: math.div(math.ceil($exact-slope * 10000), 100);
+
+  @if $desktop > $mobile {
+    @if $slope <= ($exact-slope * 100) {
+      $slope: $slope + 0.01;
+    }
+  } @else {
+    @if $slope >= ($exact-slope * 100) {
+      $slope: $slope - 0.01;
+    }
   }
-}
 
-::selection {
-  background-color: $color-gold;
-}
+  $intercept: math.div($mobile - math.div($slope, 100) * 375, 16);
 
-code {
-  white-space: normal;
-}
-
-pre {
-  display: flex;
-  position: relative;
-  font-family: Menlo,Monaco,Consolas,Liberation Mono,Courier New,monospace;
-  color: white;
-  font-size: 14px;
-  text-align: left;
-  white-space: pre;
-  word-spacing: normal;
-  word-break: normal;
-  word-wrap: normal;
-  line-height: 1.8;
-  tab-size: 4;
-  hyphens: none;
-  border-radius: 6px;
-  margin-bottom: 1.5rem;
-  padding: 1.5rem;
-  overflow: auto;
-  background: #2b2b2b;
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-.bp-button {
-  display: inline-block;
-  padding: 12px 24px 10px 24px;
-  text-decoration: none;
-  font-size: 14px;
-  border-radius: 30px;
-  line-height: 1;
-  font-weight: 500;
-  background: $color-purple;
-  color: white;
-  &:visited, &:hover, &:active {
-    color: white;
+  @if $desktop > $mobile {
+    $intercept: math.div(math.floor($intercept * 1000), 1000);
+  } @else {
+    $intercept: math.div(math.ceil($intercept * 1000), 1000);
   }
+
+  $lo: math.div(math.min($mobile, $desktop), 16);
+  $hi: math.div(math.max($mobile, $desktop), 16);
+  $operator: '+';
+  $magnitude: $slope;
+
+  @if $slope < 0 {
+    $operator: '-';
+    $magnitude: -$slope;
+  }
+
+  @return string.unquote('clamp(#{$lo}rem, #{$intercept}rem #{$operator} #{$magnitude}vw, #{$hi}rem)');
 }
 
-.bp-button--cta {
-  font-size: 16px;
-  font-weight: 400;
-  padding: 20px 30px;
+// `family` is a suffix of the `--f-*` token; `size` and `line` are the
+// (mobile, desktop) pairs in px; `line: null` means `line-height: normal`.
+$_scale: (
+  eyebrow: (
+    family: display,
+    weight: 500,
+    size: (18, 22),
+    // §Typography gives 54–62 for the desktop line; 62 is `partners-heading`.
+    line: (18, 62),
+    case: uppercase,
+    tracking: 0.11em
+  ),
+  title-xl: (
+    family: display,
+    weight: 700,
+    size: (38, 62),
+    line: (46, 62),
+    case: uppercase,
+    tracking: var(--title-tracking, 0.08em)
+  ),
+  title-l: (
+    family: display,
+    weight: 700,
+    size: (38, 46),
+    line: (46, 54),
+    case: uppercase,
+    tracking: var(--title-tracking, 0.14em)
+  ),
+  title-l-wide: (
+    family: display,
+    weight: 700,
+    size: (38, 46),
+    line: (46, 48),
+    case: uppercase,
+    tracking: var(--title-tracking, 0.17em)
+  ),
+  subhead: (
+    family: display,
+    weight: 500,
+    size: (24, 24),
+    line: (32, 32),
+    case: uppercase
+  ),
+  // §Typography has three desktop pairs (24/35, 22/36, 22/32); this is the
+  // Facility / Education one, and a section may override it.
+  lead: (
+    family: body,
+    weight: 400,
+    size: (22, 24),
+    line: (32, 35)
+  ),
+  body: (
+    family: body,
+    weight: 400,
+    size: (18, 18),
+    line: (28, 28)
+  ),
+  body-l: (
+    family: body,
+    weight: 400,
+    size: (18, 22),
+    line: (28, 32)
+  ),
+  card-title: (
+    family: alt,
+    weight: 700,
+    size: (22, 22),
+    line: (28, 28)
+  ),
+  post-title: (
+    family: alt,
+    weight: 400,
+    size: (18, 32),
+    line: (28, 38)
+  ),
+  stat: (
+    family: display,
+    weight: 400,
+    size: (64, 64),
+    line: null,
+    tracking: -0.03em
+  ),
+  stat-label: (
+    family: body,
+    weight: 400,
+    size: (18, 18),
+    line: (28, 24)
+  ),
+  meta: (
+    family: display,
+    weight: 500,
+    size: (18, 18),
+    line: (31, 31)
+  ),
+  button: (
+    family: body,
+    weight: 700,
+    size: (16, 18),
+    line: (24, 42),
+    case: uppercase
+  ),
+  link: (
+    family: body,
+    weight: 700,
+    size: (18, 18),
+    line: (18, 18),
+    case: uppercase,
+    underline: true
+  )
+);
+
+@each $name, $style in $_scale {
+  .t-#{$name} {
+    font-family: var(--f-#{map.get($style, 'family')});
+    font-weight: map.get($style, 'weight');
+    font-size: _fluid(
+      list.nth(map.get($style, 'size'), 1),
+      list.nth(map.get($style, 'size'), 2)
+    );
+
+    $line: map.get($style, 'line');
+
+    @if $line {
+      line-height: _fluid(list.nth($line, 1), list.nth($line, 2));
+    } @else {
+      line-height: normal;
+    }
+
+    @if map.get($style, 'case') {
+      text-transform: map.get($style, 'case');
+    }
+
+    @if map.get($style, 'tracking') {
+      letter-spacing: map.get($style, 'tracking');
+    }
+
+    @if map.get($style, 'underline') {
+      text-decoration: underline;
+    }
+  }
 }
