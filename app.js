@@ -40,7 +40,9 @@ export const aposOptions = {
     '@apostrophecms/vite': {},
     'default-page': {},
     'nested-layout-widget': {},
-    'nested-column-widget': {}
+    'nested-column-widget': {},
+    // CLI tasks that build the demo content (`site:seed`, `site:reset`).
+    site: {}
   }
 };
 

@@ -10,8 +10,9 @@ Requires Node.js 22.12+ (24 LTS recommended) and npm.
 
 ```sh
 npm ci
-npm run setup     # migrations + admin user admin/admin (dev only)
+npm run setup     # migrations + seed (admin admin/admin, images, home page; dev only)
 npm run dev       # http://localhost:3000, log in at /login
+npm run reset     # delete the database and uploads, then seed again (dev only)
 ```
 
 The database is `data/site.db` (override with `APOS_DB_URI`, see `.env.example`).
