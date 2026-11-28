@@ -1,7 +1,7 @@
 # `@apostrophecms/global`
 
-Site-wide settings for the header and the document head
-(`reference/spec/03-backend.md` §4). The layout reads the document as
+Site-wide settings for the header, the document head and the community avatar
+(`reference/spec/03-backend.md` §4 and §5). The layout reads the document as
 `data.global`; `site:seed` fills the defaults from `modules/site/seed/global.js`.
 
 Open the editor from the admin bar: **Global Content**.
@@ -16,6 +16,7 @@ Open the editor from the admin bar: **Global Content**.
 | SEO | `siteTitle` | string, max 80 | Page `<title>`; page templates can still override it with a `title` prop. |
 | SEO | `metaDescription` | string, textarea, max 200 | `<meta name="description">`. |
 | SEO | `_ogImage` | relationship → image, max 1 | `<meta property="og:image">`, as an absolute URL. |
+| Community | `_defaultAvatar` | relationship → image, max 1 | Avatar for community posts that have no `_avatar` of their own. |
 
 ## Templates
 

@@ -73,6 +73,15 @@ export default {
         help: 'Shared on social networks; 1200 × 630 works best.',
         withType: '@apostrophecms/image',
         max: 1
+      },
+      // Fallback for `community-post._avatar`
+      // (reference/spec/03-backend.md §5).
+      _defaultAvatar: {
+        type: 'relationship',
+        label: 'Default avatar',
+        help: 'Shown on community posts that do not have their own avatar.',
+        withType: '@apostrophecms/image',
+        max: 1
       }
     },
     group: {
@@ -90,6 +99,12 @@ export default {
           'siteTitle',
           'metaDescription',
           '_ogImage'
+        ]
+      },
+      community: {
+        label: 'Community',
+        fields: [
+          '_defaultAvatar'
         ]
       }
     }
