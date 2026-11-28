@@ -86,6 +86,52 @@ export function LinkMore({ url, label }) {
   return <a className='c-link-more' href={url}>{label}</a>;
 }
 
+// §Components `video-embed` and §Layout (video 1100 × 619 at the desktop
+// design, 347 × 198 on mobile, play button 72 / 60): the poster sits under a
+// 40% black overlay and a centred play button. `data-video-url` is the oEmbed
+// URL from the field; `modules/asset/ui/src/js/video-embed.js` parses the
+// provider id from it on click, so the page loads nothing from YouTube or Vimeo
+// until then (Q-12). The button's name doubles as the iframe's `title`.
+export function VideoEmbed({
+  apos, video
+}) {
+  const url = video?.media?.url?.trim();
+  const poster = video?._poster?.[0];
+  const title = video?.title?.trim();
+  if (!url || !poster) {
+    return null;
+  }
+  const label = title ? `Play video: ${title}` : 'Play video';
+  return (
+    <div
+      className='c-video-embed'
+      data-video-embed
+      data-video-url={url}
+      data-video-title={title || undefined}
+    >
+      <Picture
+        apos={apos}
+        image={poster}
+        sizes='(min-width: 1200px) 1100px, calc(100vw - 28px)'
+      />
+      <button className='c-video-embed__play' type='button' aria-label={label}>
+        {/* The play-72/play-60 fixtures as one scalable glyph; the button's
+            size from §Components scales it to 60 px on mobile. */}
+        <svg
+          className='c-video-embed__icon'
+          viewBox='0 0 72 72'
+          fill='none'
+          aria-hidden='true'
+          focusable='false'
+        >
+          <circle cx='36' cy='36' r='34.8615' stroke='currentColor' strokeWidth='2.27702' />
+          <path d='M47.0312 35.7097L30.0474 45.5153L30.0474 25.904L47.0312 35.7097Z' fill='currentColor' />
+        </svg>
+      </button>
+    </div>
+  );
+}
+
 // Images always go through this component: `srcset` from Apostrophe's image
 // sizes, `sizes` from the caller, intrinsic width and height to prevent layout
 // shift, and `alt` from the image piece (reference/spec/04-frontend.md

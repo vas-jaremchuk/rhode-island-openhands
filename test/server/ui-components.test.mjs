@@ -268,6 +268,72 @@ describe('shared UI components', function () {
     });
   });
 
+  describe('VideoEmbed', () => {
+    const poster = {
+      alt: 'A technician in a cleanroom',
+      attachment: {
+        _id: 'poster1',
+        name: 'poster.jpg',
+        extension: 'jpg',
+        group: 'images',
+        width: 1100,
+        height: 619
+      }
+    };
+
+    it('renders the poster and a play button labelled with the video title', async () => {
+      const html = await render(ui.VideoEmbed({
+        apos: site.apos,
+        video: {
+          media: {
+            url: 'https://www.youtube.com/watch?v=YqP8s2M4xig'
+          },
+          _poster: [ poster ],
+          title: 'Tour our facility'
+        }
+      }));
+
+      assert.match(html, /^<div class="c-video-embed" data-video-embed data-video-url="https:\/\/www\.youtube\.com\/watch\?v=YqP8s2M4xig" data-video-title="Tour our facility">/);
+      assert.match(html, /<img [^>]*class="c-picture"/);
+      assert.match(html, /alt="A technician in a cleanroom"/);
+      assert.match(html, /<button class="c-video-embed__play" type="button" aria-label="Play video: Tour our facility">/);
+      assert.equal((html.match(/<button\b/g) || []).length, 1);
+      // Nothing fetches a player before the click: the markup only carries the
+      // stored oEmbed URL for `initVideoEmbed` to parse.
+      assert.doesNotMatch(html, /<iframe\b/);
+      assert.doesNotMatch(html, /youtube-nocookie|player\.vimeo/);
+    });
+
+    it('renders nothing without a poster or a media URL', async () => {
+      const video = {
+        media: {
+          url: 'https://www.youtube.com/watch?v=YqP8s2M4xig'
+        },
+        _poster: [ poster ],
+        title: 'Tour our facility'
+      };
+
+      assert.equal(await render(ui.VideoEmbed({
+        apos: site.apos,
+        video: {
+          ...video,
+          _poster: []
+        }
+      })), '');
+      assert.equal(await render(ui.VideoEmbed({
+        apos: site.apos,
+        video: {
+          ...video,
+          media: null
+        }
+      })), '');
+      assert.equal(await render(ui.VideoEmbed({
+        apos: site.apos,
+        video: null
+      })), '');
+    });
+  });
+
   describe('Icon', () => {
     it('references the sprite and hides itself from assistive tech without a label', async () => {
       const html = await render(ui.Icon({

@@ -120,6 +120,82 @@
   display: block;
 }
 
+// §Components `video-embed`: poster (cover) under a 40% black overlay with a
+// centred play button — 72 px at `lg`, 60 px below it (§Layout). The box is
+// 16:9 at any width (1100 × 619 in the desktop container, 347 × 198 on mobile).
+.c-video-embed {
+  position: relative;
+  overflow: hidden;
+  inline-size: 100%;
+  aspect-ratio: 16 / 9;
+
+  // The overlay sits above the poster but below the play button. It is removed
+  // once the iframe replaces the button, or it would cover the player.
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--c-overlay);
+    pointer-events: none;
+  }
+
+  &--playing::after {
+    display: none;
+  }
+
+  .c-picture,
+  .c-video-embed__iframe {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+  }
+
+  .c-picture {
+    object-fit: cover;
+  }
+
+  .c-video-embed__iframe {
+    border: 0;
+  }
+}
+
+// §Components `video-embed`: the centred play button. Yellow on the dark
+// overlay, per the design's play-72 / play-60 glyphs.
+.c-video-embed__play {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 60px;
+  block-size: 60px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--c-yellow);
+  cursor: pointer;
+  translate: -50% -50%;
+
+  @include mq(lg) {
+    inline-size: 72px;
+    block-size: 72px;
+  }
+
+  &:focus-visible {
+    outline: 3px solid var(--c-yellow);
+    outline-offset: 2px;
+  }
+}
+
+.c-video-embed__icon {
+  inline-size: 100%;
+  block-size: 100%;
+}
+
 // Site chrome — reference/spec/02-design-system.md node map rows 1 (header) and
 // 10 (footer), reference/spec/04-frontend.md §Section layouts, Q-5 (mobile
 // header is the logo only) and Q-6 (the footer is an empty block).
