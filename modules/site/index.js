@@ -13,6 +13,7 @@ import images from './seed/images.js';
 import globalSettings from './seed/global.js';
 import news from './seed/news.js';
 import community from './seed/community.js';
+import partners from './seed/partners.js';
 
 const IMAGE_DIR = 'fixtures/images';
 const DB_FILE_SUFFIXES = [ '', '-wal', '-shm' ];
@@ -21,7 +22,7 @@ export default {
   tasks(self) {
     return {
       seed: {
-        usage: 'node app site:seed\n\nCreates the admin user, imports the media library, fills Global settings, adds the news items and community posts, and ensures the home page is published. Safe to run twice.',
+        usage: 'node app site:seed\n\nCreates the admin user, imports the media library, fills Global settings, adds the news items, community posts and college partners, and ensures the home page is published. Safe to run twice.',
         async task() {
           await self.seed();
         }
@@ -45,8 +46,9 @@ export default {
         await self.seedGlobal(req);
         await self.seedNews(req);
         await self.seedCommunity(req);
+        await self.seedPartners(req);
         await self.ensureHomePage(req);
-        self.apos.util.log('site:seed: admin, images, Global settings, news items, community posts and home page are in place');
+        self.apos.util.log('site:seed: admin, images, Global settings, news items, community posts, college partners and home page are in place');
       },
 
       async ensureAdmin(req) {
@@ -195,6 +197,29 @@ export default {
           await communityModule.insert(req, {
             ...post,
             _image: [ imagePiece._id ]
+          });
+        }
+      },
+
+      // The five college partners of the Figma logo strip, in strip order. The
+      // explicit slug in `seed/partners.js` is the idempotency key; the logo is
+      // looked up in the media library by the title `seedImages` imported it
+      // under.
+      async seedPartners(req) {
+        const partnerModule = self.apos.modules['college-partner'];
+        for (const { image, ...partner } of partners) {
+          const existing = await partnerModule
+            .find(req, { slug: partner.slug }).toObject();
+          if (existing) {
+            continue;
+          }
+          const imagePiece = await self.findImageByTitle(req, image);
+          if (!imagePiece) {
+            throw new Error(`site:seed: the image "${image}" for "${partner.slug}" is missing`);
+          }
+          await partnerModule.insert(req, {
+            ...partner,
+            _logo: [ imagePiece._id ]
           });
         }
       },

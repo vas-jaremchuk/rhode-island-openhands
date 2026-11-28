@@ -50,6 +50,9 @@ export const aposOptions = {
     'news-item': {},
     // Community posts the community section lists (reference/spec/03-backend.md §5).
     'community-post': {},
+    // College partner logos for the education section
+    // (reference/spec/03-backend.md §5).
+    'college-partner': {},
     // CLI tasks that build the demo content (`site:seed`, `site:reset`).
     site: {}
   }
