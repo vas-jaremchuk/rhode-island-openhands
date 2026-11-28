@@ -17,6 +17,9 @@ import partners from './seed/partners.js';
 
 const IMAGE_DIR = 'fixtures/images';
 const DB_FILE_SUFFIXES = [ '', '-wal', '-shm' ];
+// Contact submissions are kept for 365 days (Q-7).
+const DEFAULT_PURGE_DAYS = 365;
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 export default {
   tasks(self) {
@@ -31,6 +34,12 @@ export default {
         usage: 'node app site:reset\n\nDeletes the SQLite database and public/uploads, then seeds. Refused when NODE_ENV=production.',
         async task() {
           await self.reset();
+        }
+      },
+      'purge-submissions': {
+        usage: 'node app site:purge-submissions --days=N\n\nDeletes contact form submissions older than N days. Defaults to 365 (Q-7).',
+        async task(argv) {
+          return self.purgeSubmissions(argv);
         }
       }
     };
@@ -281,6 +290,34 @@ export default {
           recursive: true,
           force: true
         })));
+      },
+
+      // Deletes every `contact-submission` created more than `days` days ago
+      // and returns `{ days, deleted }`. The retention period is 365 days
+      // (Q-7); the task runs outside the app on a schedule
+      // (reference/spec/03-backend.md §8).
+      async purgeSubmissions({ days = DEFAULT_PURGE_DAYS } = {}) {
+        const retentionDays = typeof days === 'number' ? days : Number.parseInt(days, 10);
+        if (!Number.isInteger(retentionDays) || retentionDays < 0) {
+          throw new Error(`site:purge-submissions: --days must be a non-negative integer, got "${days}"`);
+        }
+        const cutoff = new Date(Date.now() - retentionDays * DAY_MS);
+        const req = self.apos.task.getReq({ mode: 'published' });
+        const submissions = await self.apos.modules['contact-submission']
+          .find(req, {
+            createdAt: {
+              $lt: cutoff
+            }
+          })
+          .toArray();
+        for (const submission of submissions) {
+          await self.apos.doc.delete(req, submission);
+        }
+        self.apos.util.log(`site:purge-submissions: deleted ${submissions.length} submission(s) older than ${retentionDays} day(s)`);
+        return {
+          days: retentionDays,
+          deleted: submissions.length
+        };
       }
     };
   }
