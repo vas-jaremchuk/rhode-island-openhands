@@ -20,7 +20,7 @@ duplicating queries:
 | `seed()` | The whole seed, with a published-mode request. |
 | `ensureAdmin(req)` | Creates the `admin` user if the username is free. |
 | `seedImages(req)` | Imports every entry of `seed/images.js`. |
-| `seedGlobal(req)` | Fills the empty Global fields from `seed/global.js`: header wordmarks, utility links, site title, meta description and Open Graph image. |
+| `seedGlobal(req)` | Fills the empty Global fields from `seed/global.js`: header wordmarks, utility links, site title, meta description, Open Graph image, default avatar and the Contact group (recipients, areas of interest and success message). |
 | `seedNews(req)` | Inserts the News & Events items of `seed/news.js` that are missing, keyed by their explicit slug. |
 | `seedCommunity(req)` | Inserts the Community Posts of `seed/community.js` that are missing, keyed by their explicit slug, relating each to its image in the media library. |
 | `seedPartners(req)` | Inserts the College Partners of `seed/partners.js` that are missing, keyed by their explicit slug, relating each to its logo in the media library. |
@@ -31,9 +31,9 @@ duplicating queries:
 
 Seed content lives in data files, one per area of the site, so a later task adds an entry
 instead of a code path. `seed/images.js` holds the media library; `seed/global.js` holds the
-Global settings for the header, SEO and community avatar; `seed/news.js` holds the News &
-Events pieces; `seed/community.js` holds the Community Posts; `seed/partners.js` holds the
-College Partners.
+Global settings for the header, SEO, community avatar and contact group;
+`seed/news.js` holds the News & Events pieces; `seed/community.js` holds the
+Community Posts; `seed/partners.js` holds the College Partners.
 
 ## Fields
 
