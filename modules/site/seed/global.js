@@ -11,6 +11,9 @@ export default {
   headerLogo: 'Organogenesis wordmark',
   headerLogoMobile: 'Organogenesis wordmark mobile',
   ogImage: 'Hero background',
+  // Fallback avatar for community posts that have no `_avatar` of their own
+  // (`community-post` in reference/spec/03-backend.md §5).
+  defaultAvatar: 'Organogenesis avatar',
   // Q-11: OUR STORY and INVESTORS & MEDIA leave the page; CONTACT US scrolls to
   // the on-page form (`#contact`).
   utilityLinks: [

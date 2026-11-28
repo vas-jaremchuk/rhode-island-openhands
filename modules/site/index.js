@@ -12,6 +12,7 @@ import path from 'node:path';
 import images from './seed/images.js';
 import globalSettings from './seed/global.js';
 import news from './seed/news.js';
+import community from './seed/community.js';
 
 const IMAGE_DIR = 'fixtures/images';
 const DB_FILE_SUFFIXES = [ '', '-wal', '-shm' ];
@@ -20,7 +21,7 @@ export default {
   tasks(self) {
     return {
       seed: {
-        usage: 'node app site:seed\n\nCreates the admin user, imports the media library, fills Global settings, adds the news items and ensures the home page is published. Safe to run twice.',
+        usage: 'node app site:seed\n\nCreates the admin user, imports the media library, fills Global settings, adds the news items and community posts, and ensures the home page is published. Safe to run twice.',
         async task() {
           await self.seed();
         }
@@ -43,8 +44,9 @@ export default {
         await self.seedImages(req);
         await self.seedGlobal(req);
         await self.seedNews(req);
+        await self.seedCommunity(req);
         await self.ensureHomePage(req);
-        self.apos.util.log('site:seed: admin, images, Global settings, news items and home page are in place');
+        self.apos.util.log('site:seed: admin, images, Global settings, news items, community posts and home page are in place');
       },
 
       async ensureAdmin(req) {
@@ -135,7 +137,8 @@ export default {
         for (const [ field, title ] of [
           [ '_headerLogo', globalSettings.headerLogo ],
           [ '_headerLogoMobile', globalSettings.headerLogoMobile ],
-          [ '_ogImage', globalSettings.ogImage ]
+          [ '_ogImage', globalSettings.ogImage ],
+          [ '_defaultAvatar', globalSettings.defaultAvatar ]
         ]) {
           if (!current[field]?.length) {
             const value = await relation(title);
@@ -171,6 +174,28 @@ export default {
               ...item
             });
           }
+        }
+      },
+
+      // The three community posts of the Figma frame. The explicit slug in
+      // `seed/community.js` is the idempotency key; the image is looked up in
+      // the media library by the title `seedImages` imported it under.
+      async seedCommunity(req) {
+        const communityModule = self.apos.modules['community-post'];
+        for (const { image, ...post } of community) {
+          const existing = await communityModule
+            .find(req, { slug: post.slug }).toObject();
+          if (existing) {
+            continue;
+          }
+          const imagePiece = await self.findImageByTitle(req, image);
+          if (!imagePiece) {
+            throw new Error(`site:seed: the image "${image}" for "${post.slug}" is missing`);
+          }
+          await communityModule.insert(req, {
+            ...post,
+            _image: [ imagePiece._id ]
+          });
         }
       },
 
