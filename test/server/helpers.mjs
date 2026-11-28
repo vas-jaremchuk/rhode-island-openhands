@@ -165,17 +165,27 @@ export function createJar(url, cookies = new Map()) {
       });
     },
     post(path, body, init = {}) {
-      return request(path, {
-        ...init,
-        method: 'POST',
-        headers: {
-          'content-type': 'application/json',
-          ...init.headers
-        },
-        body: typeof body === 'string' ? body : JSON.stringify(body)
-      });
+      return send('POST', path, body, init);
+    },
+    put(path, body, init = {}) {
+      return send('PUT', path, body, init);
+    },
+    patch(path, body, init = {}) {
+      return send('PATCH', path, body, init);
     }
   };
+
+  function send(method, path, body, init = {}) {
+    return request(path, {
+      ...init,
+      method,
+      headers: {
+        'content-type': 'application/json',
+        ...init.headers
+      },
+      body: typeof body === 'string' ? body : JSON.stringify(body)
+    });
+  }
 }
 
 // Logs in over HTTP and returns the cookie jar, so later requests are

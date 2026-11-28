@@ -53,6 +53,9 @@ export const aposOptions = {
     // College partner logos for the education section
     // (reference/spec/03-backend.md §5).
     'college-partner': {},
+    // Contact form submissions, private to admins and editors
+    // (reference/spec/03-backend.md §5).
+    'contact-submission': {},
     // CLI tasks that build the demo content (`site:seed`, `site:reset`).
     site: {}
   }

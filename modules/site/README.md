@@ -6,6 +6,7 @@ Command line tasks that build the demo content. Run them from the project root:
 |------|------|
 | `node app site:seed` | Creates the admin (`admin` / `$APOS_ADMIN_PASSWORD`, default `admin`), imports `fixtures/images/` into the media library, fills the Global settings the layout reads, adds the three News & Events items, the three Community Posts and the five College Partners, and makes sure the home page is published. Idempotent: it finds the admin by username, each image by slug, each piece by the slug in `seed/news.js` / `seed/community.js` / `seed/partners.js`, and only writes Global fields that are empty, so a second run creates nothing. |
 | `node app site:reset` | Refuses to run when `NODE_ENV=production`. Deletes the SQLite file named by `APOS_DB_URI` (plus its `-wal` / `-shm`) and `public/uploads/*`, then runs the seed in a child process. |
+| `node app site:purge-submissions --days=N` | Deletes `contact-submission` documents created more than N days ago; `--days` defaults to 365 (Q-7). Run it from a scheduler outside the app. |
 
 `npm run setup` runs the migrations and then `site:seed`; `npm run reset` runs `site:reset`.
 
@@ -26,6 +27,7 @@ duplicating queries:
 | `findImageByTitle(req, title)` | Returns the media-library piece the seed imported for `title`, or `null`. |
 | `importImage(req, file, { title, alt })` | Uploads `file` (relative to the project root) and inserts the image piece. The slug is `image-<slugified title>` and is the idempotency key. |
 | `ensureHomePage(req)` | Returns the published home page, publishing or parking it when it is missing. |
+| `purgeSubmissions({ days = 365 })` | Deletes `contact-submission` documents created more than `days` days ago and returns `{ days, deleted }`. `site:purge-submissions` is a thin wrapper around it. |
 
 Seed content lives in data files, one per area of the site, so a later task adds an entry
 instead of a code path. `seed/images.js` holds the media library; `seed/global.js` holds the
