@@ -123,7 +123,7 @@ export default [
   {
     file: 'partner-uri.png',
     title: 'University of Rhode Island logo',
-    alt: 'The University of Rhode Island'
+    alt: 'University of Rhode Island'
   },
 
   // Careers
