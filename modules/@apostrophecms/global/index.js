@@ -1,6 +1,9 @@
-// Site-wide settings for the header and the document head —
-// reference/spec/03-backend.md §4 (Header and SEO groups). The layout reads
-// them as `data.global`; `site:seed` fills the defaults (modules/site/seed/global.js).
+// Site-wide settings for the header, the document head and the contact form —
+// reference/spec/03-backend.md §4 (Header, SEO and Contact groups). The layout
+// reads them as `data.global`; `site:seed` fills the defaults
+// (modules/site/seed/global.js).
+import { contactSettings } from '../../../lib/contact-settings.js';
+
 export default {
   fields: {
     add: {
@@ -82,6 +85,45 @@ export default {
         help: 'Shown on community posts that do not have their own avatar.',
         withType: '@apostrophecms/image',
         max: 1
+      },
+      // Q-10: the recipients, options and success message of the contact form.
+      // `contactRecipients` is server-side only: no public projection or page
+      // data includes it (`getContactSettings` is the server API).
+      contactRecipients: {
+        type: 'string',
+        label: 'Contact form recipients',
+        help: 'Comma-separated email addresses that receive contact form submissions. When empty the CONTACT_TO environment variable is used. Visitors never see this list.',
+        max: 500
+      },
+      areasOfInterest: {
+        type: 'array',
+        label: 'Areas of interest',
+        help: 'The options of the contact form "Area of interest" field, in order. The submitted value must be one of these (Q-10).',
+        titleField: 'label',
+        fields: {
+          add: {
+            label: {
+              type: 'string',
+              label: 'Label',
+              help: 'Text the visitor sees in the select field.',
+              required: true,
+              max: 80
+            },
+            value: {
+              type: 'string',
+              label: 'Value',
+              help: 'Stored on the submission; keep it stable and unique.',
+              required: true,
+              max: 80
+            }
+          }
+        }
+      },
+      successMessage: {
+        type: 'string',
+        label: 'Success message',
+        help: 'Shown in the contact form after a visitor sends it. Empty falls back to "Thank you. We will be in touch.".',
+        max: 200
       }
     },
     group: {
@@ -106,7 +148,26 @@ export default {
         fields: [
           '_defaultAvatar'
         ]
+      },
+      contact: {
+        label: 'Contact',
+        fields: [
+          'contactRecipients',
+          'areasOfInterest',
+          'successMessage'
+        ]
       }
     }
+  },
+  methods(self) {
+    return {
+      // The Contact group as the contact form service and widget consume it:
+      // `{ recipients: string[], areas, successMessage }`. The recipients stay
+      // on the server (reference/spec/03-backend.md §4, Q-10).
+      async getContactSettings(req) {
+        const global = req.data.global || await self.findGlobal(req);
+        return contactSettings(global);
+      }
+    };
   }
 };

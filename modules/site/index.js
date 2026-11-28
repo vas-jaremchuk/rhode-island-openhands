@@ -145,6 +145,17 @@ export default {
         if (!current.utilityLinks?.length) {
           patch.utilityLinks = globalSettings.utilityLinks;
         }
+        // Q-10: the Contact group. Empty fields are filled, so a fresh database
+        // shows the default recipients, areas and success message.
+        if (!current.contactRecipients) {
+          patch.contactRecipients = globalSettings.contactRecipients;
+        }
+        if (!current.areasOfInterest?.length) {
+          patch.areasOfInterest = globalSettings.areasOfInterest;
+        }
+        if (!current.successMessage) {
+          patch.successMessage = globalSettings.successMessage;
+        }
         for (const [ field, title ] of [
           [ '_headerLogo', globalSettings.headerLogo ],
           [ '_headerLogoMobile', globalSettings.headerLogoMobile ],
