@@ -11,6 +11,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import images from './seed/images.js';
 import globalSettings from './seed/global.js';
+import news from './seed/news.js';
 
 const IMAGE_DIR = 'fixtures/images';
 const DB_FILE_SUFFIXES = [ '', '-wal', '-shm' ];
@@ -19,7 +20,7 @@ export default {
   tasks(self) {
     return {
       seed: {
-        usage: 'node app site:seed\n\nCreates the admin user, imports the media library and ensures the home page is published. Safe to run twice.',
+        usage: 'node app site:seed\n\nCreates the admin user, imports the media library, fills Global settings, adds the news items and ensures the home page is published. Safe to run twice.',
         async task() {
           await self.seed();
         }
@@ -41,8 +42,9 @@ export default {
         await self.ensureAdmin(req);
         await self.seedImages(req);
         await self.seedGlobal(req);
+        await self.seedNews(req);
         await self.ensureHomePage(req);
-        self.apos.util.log('site:seed: admin, images, Global settings and home page are in place');
+        self.apos.util.log('site:seed: admin, images, Global settings, news items and home page are in place');
       },
 
       async ensureAdmin(req) {
@@ -156,6 +158,20 @@ export default {
         const imageModule = self.apos.modules['@apostrophecms/image'];
         const slug = `${imageModule.options.slugPrefix}${self.apos.util.slugify(title)}`;
         return imageModule.find(req, { slug }).toObject();
+      },
+
+      // The three News & Events cards of the Figma frame. The explicit slug in
+      // `seed/news.js` is the idempotency key, because two cards share a title.
+      async seedNews(req) {
+        const newsModule = self.apos.modules['news-item'];
+        for (const item of news) {
+          const existing = await newsModule.find(req, { slug: item.slug }).toObject();
+          if (!existing) {
+            await newsModule.insert(req, {
+              ...item
+            });
+          }
+        }
       },
 
       // Parked pages are created at startup by `@apostrophecms/migration`, so
